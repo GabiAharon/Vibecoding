@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מצגת וייב קודינג</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --slide-width: 1280px;
+      --slide-height: 720px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Rubik', sans-serif;
+      background: #000;
+      overflow: hidden;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      z-index: 50;
+      display: flex;
+      gap: 8px;
+      background: rgba(18, 18, 18, 0.7);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      transition: transform .25s ease, opacity .25s ease;
+    }
+    .toolbar.hidden { transform: translate(-50%, -140%); opacity: 0; pointer-events: none; }
+    .toolbar.visible { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+    .toolbar button {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    .toolbar button:hover { background: rgba(255,255,255,0.22); }
+    .toolbar .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-inline-start: 6px; }
+    .dot.view { background: #22c55e; }
+    .dot.edit { background: #f59e0b; }
+
+    /* Stage (16:9) */
+    .viewport {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000; /* letterboxing */
+    }
+
+    /* Hover zone to reveal toolbar */
+    .hover-zone {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 14px;
+      z-index: 45;
+    }
+    .stage {
+      position: relative;
+      width: var(--slide-width);
+      height: var(--slide-height);
+      transform-origin: center center;
+      transform: scale(1);
+    }
+
+    /* Highlight editable elements in edit mode */
+    .edit-mode [data-editable] { outline: 2px dashed rgba(255,255,255,0.4); outline-offset: 3px; cursor: text; }
+    [data-editable] { outline: none; }
+
+    /* Slide base styles (taken/adapted from slide1) */
+    .slide {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: auto; /* allow vertical scroll if content is taller */
+      background: linear-gradient(135deg, #4a00e0, #8e2de2);
+      color: white;
+    }
+    .slide[hidden] { display: none; }
+    .bg-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background-image: url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80');
+      background-size: cover; background-position: center; opacity: 0.25; z-index: 1;
+    }
+    .content {
+      position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px;
+    }
+    .title {
+      font-size: 72px; font-weight: 900; margin-bottom: 20px; text-align: center;
+      background: linear-gradient(90deg, #ffffff, #a2d2ff);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      text-shadow: 0px 2px 10px rgba(0,0,0,0.2);
+    }
+    .subtitle {
+      font-size: 28px; font-weight: 500; margin-bottom: 50px; color: #e0f2fe; text-align: center; max-width: 80%;
+    }
+    .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-top: 20px; }
+    .icon-item { display: flex; flex-direction: column; align-items: center; transition: transform 0.3s; }
+    .icon-item:hover { transform: translateY(-10px); }
+    .icon-circle {
+      width: 90px; height: 90px; border-radius: 50%; background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    .icon-circle i { font-size: 40px; color: #ffffff; }
+    .icon-label { font-size: 18px; font-weight: 500; }
+    .floating-shapes { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1; pointer-events: none; }
+    .shape { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.1); animation: float 15s infinite ease-in-out; }
+    .shape:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 5%; animation-delay: 0s; }
+    .shape:nth-child(2) { width: 200px; height: 200px; top: 70%; left: 85%; animation-delay: 2s; }
+    .shape:nth-child(3) { width: 150px; height: 150px; top: 40%; left: 90%; animation-delay: 4s; }
+    .shape:nth-child(4) { width: 120px; height: 120px; top: 75%; left: 10%; animation-delay: 6s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+    }
+    .tech-particles { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1; pointer-events: none; }
+    .particle { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); animation: move-particle 20s infinite linear; }
+    @keyframes move-particle {
+      0% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+
+    /* Slide navigation */
+    .nav-controls {
+      position: absolute;
+      left: 0; right: 0; bottom: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      z-index: 6;
+      pointer-events: none; /* buttons re-enable */
+    }
+    .nav-controls button {
+      pointer-events: auto;
+      background: rgba(0,0,0,0.45);
+      color: #fff; border: 1px solid rgba(255,255,255,0.25);
+      padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: .2s;
+    }
+    .nav-controls button:hover { background: rgba(0,0,0,0.6); }
+    .slide-counter { color: #e5e7eb; background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
+
+    /* Iframe slides */
+    .slide-iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .slide.scrollable .slide-iframe { height: 100%; }
+  </style>
+</head>
+<body>
+  <!-- Toolbar -->
+  <div class="toolbar hidden" id="toolbar" aria-label="סרגל כלים">
+    <button id="toggleEditBtn"><span class="dot view" id="modeDot"></span>מצב עריכה</button>
+    <button id="saveBtn"><i class="far fa-save"></i> שמור</button>
+    <button id="resetBtn" title="איפוס הנתונים השמורים">איפוס</button>
+    <button id="fullscreenBtn" title="מסך מלא"><i class="fas fa-expand"></i></button>
+  </div>
+  <div class="hover-zone" id="hoverZone" aria-hidden="true"></div>
+
+  <!-- 16:9 viewport -->
+  <div class="viewport" id="viewport">
+    <div class="stage" id="stage">
+      <!-- Slide 1 (iframe for unified editing/saving) -->
+      <section class="slide" data-slide="1">
+        <iframe class="slide-iframe" data-src="slide1.html"></iframe>
+      </section>
+
+      <!-- Slide 2 -->
+      <section class="slide" data-slide="2" hidden>
+        <iframe class="slide-iframe" data-src="slide2.html"></iframe>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide" data-slide="3" hidden>
+        <iframe class="slide-iframe" data-src="slide3.html"></iframe>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide" data-slide="4" hidden>
+        <iframe class="slide-iframe" data-src="slide4.html"></iframe>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide" data-slide="5" hidden>
+        <iframe class="slide-iframe" data-src="slide5.html"></iframe>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide" data-slide="6" hidden>
+        <iframe class="slide-iframe" data-src="slide6.html"></iframe>
+      </section>
+
+      <!-- Slide 7 -->
+      <section class="slide" data-slide="7" hidden>
+        <iframe class="slide-iframe" data-src="slide7.html"></iframe>
+      </section>
+
+      <!-- Slide 8 -->
+      <section class="slide" data-slide="8" hidden>
+        <iframe class="slide-iframe" data-src="slide8.html"></iframe>
+      </section>
+
+      <!-- Slide 9 -->
+      <section class="slide" data-slide="9" hidden>
+        <iframe class="slide-iframe" data-src="slide9.html"></iframe>
+      </section>
+
+      <!-- Slide 10 -->
+      <section class="slide" data-slide="10" hidden>
+        <iframe class="slide-iframe" data-src="slide10.html"></iframe>
+      </section>
+
+      <!-- Slide 11 -->
+      <section class="slide" data-slide="11" hidden>
+        <iframe class="slide-iframe" data-src="slide11.html"></iframe>
+      </section>
+
+      <!-- Slide 12 -->
+      <section class="slide" data-slide="12" hidden>
+        <iframe class="slide-iframe" data-src="slide12.html"></iframe>
+      </section>
+
+      <!-- Slide 13 -->
+      <section class="slide" data-slide="13" hidden>
+        <iframe class="slide-iframe" data-src="slide13.html"></iframe>
+      </section>
+
+      <!-- Slide 14 -->
+      <section class="slide" data-slide="14" hidden>
+        <iframe class="slide-iframe" data-src="slide14.html"></iframe>
+      </section>
+
+      <!-- Slide 15 -->
+      <section class="slide" data-slide="15" hidden>
+        <iframe class="slide-iframe" data-src="slide15.html"></iframe>
+      </section>
+
+      <!-- Navigation/UI overlay -->
+      <div class="nav-controls" id="navControls">
+        <button id="prevBtn" title="קודם"><i class="fas fa-chevron-right" style="transform: scaleX(-1);"></i></button>
+        <div class="slide-counter" id="slideCounter">1 / 1</div>
+        <button id="nextBtn" title="הבא"><i class="fas fa-chevron-left" style="transform: scaleX(-1);"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const STAGE_BASE_WIDTH = 1280;
+      const STAGE_BASE_HEIGHT = 720;
+      const STORAGE_PREFIX = 'web_coding_presentation';
+      const API_BASE = 'http://localhost:5174';
+      // Slides
+      const slides = Array.from(document.querySelectorAll('section.slide'));
+      let currentSlideIndex = 0;
+      const EDITABLE_SELECTORS = [
+        'h1','h2','h3','.title','.subtitle','.section-title','.example-title','.card-title','.stats-title',
+        '.quote-text','.note','.tip-text','.qa-text','.resource-title','.benefit-text','.advantage-text',
+        '.definition-text','.origin-text','.step-text','.step-description','.message-bubble','.example-description',
+        '.idea-content','.example-business-name','.stat-description','.feature-text','.website-title','.website-subtitle',
+        '.question-text','.intro-text','.card-description'
+      ].join(',');
+
+      function getSlideId(index) {
+        const el = slides[index];
+        return el ? String(el.getAttribute('data-slide') || (index + 1)) : String(index + 1);
+      }
+      function storageKeyFor(index) {
+        return `${STORAGE_PREFIX}:slide:${getSlideId(index)}`;
+      }
+
+      const stage = document.getElementById('stage');
+      const viewport = document.getElementById('viewport');
+      const toggleEditBtn = document.getElementById('toggleEditBtn');
+      const toolbar = document.getElementById('toolbar');
+      const hoverZone = document.getElementById('hoverZone');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const slideCounter = document.getElementById('slideCounter');
+      const saveBtn = document.getElementById('saveBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const modeDot = document.getElementById('modeDot');
+      let editMode = false;
+
+      function applyScale() {
+        // Compute scale based on full viewport; toolbar floats and doesn't reserve space
+        const vw = viewport.clientWidth;
+        const vh = viewport.clientHeight;
+        const scale = Math.min(vw / STAGE_BASE_WIDTH, vh / STAGE_BASE_HEIGHT);
+        stage.style.transform = `scale(${scale})`;
+      }
+
+      // Toolbar show/hide logic
+      let hideTimeout;
+      function showToolbar(temp = true) {
+        toolbar.classList.remove('hidden');
+        toolbar.classList.add('visible');
+        if (temp) {
+          clearTimeout(hideTimeout);
+          hideTimeout = setTimeout(() => hideToolbar(), 1800);
+        }
+      }
+      function hideToolbar() {
+        toolbar.classList.remove('visible');
+        toolbar.classList.add('hidden');
+      }
+
+      function setEditMode(enabled) {
+        editMode = !!enabled;
+        document.body.classList.toggle('edit-mode', editMode);
+        // In-document editables
+        document.querySelectorAll('[data-editable]').forEach(el => {
+          el.setAttribute('contenteditable', String(editMode));
+        });
+        // Iframe editables
+        document.querySelectorAll('iframe.slide-iframe').forEach(iframe => {
+          try {
+            const doc = iframe.contentDocument;
+            if (!doc) return;
+            doc.querySelectorAll('[data-editable]').forEach(el => {
+              el.setAttribute('contenteditable', String(editMode));
+            });
+            // sync CSS class to show dashed outline only in edit mode
+            if (editMode) {
+              doc.documentElement.classList.add('edit-mode');
+            } else {
+              doc.documentElement.classList.remove('edit-mode');
+            }
+          } catch (e) { /* ignore */ }
+        });
+        modeDot.classList.toggle('view', !editMode);
+        modeDot.classList.toggle('edit', editMode);
+      }
+
+      async function saveSlide() {
+        const data = {};
+        const active = slides[currentSlideIndex];
+        const iframe = active.querySelector('iframe');
+        if (iframe && iframe.contentDocument) {
+          const doc = iframe.contentDocument;
+          // ensure keys for common elements if missing
+          const autoTargets = doc.querySelectorAll('h1,h2,h3,.title,.subtitle,.section-title,.example-title,.card-title,.stats-title,.quote-text,.note,.tip-text,.qa-text,.resource-title,.benefit-text,.advantage-text,.definition-text,.origin-text,.step-text,.step-description,.message-bubble,.example-description,.idea-content,.example-business-name,.stat-description,.feature-text,.website-title,.website-subtitle,.question-text,.intro-text,.card-description');
+          autoTargets.forEach((el, idx) => {
+            if (!el.getAttribute('data-key')) {
+              el.setAttribute('data-key', `s${getSlideId(currentSlideIndex)}-k${idx}`);
+              el.setAttribute('data-editable','');
+            }
+          });
+          doc.querySelectorAll('[data-key]').forEach(el => {
+            const key = el.getAttribute('data-key');
+            data[key] = el.innerHTML;
+          });
+        } else {
+          active.querySelectorAll('[data-key]').forEach(el => {
+            const key = el.getAttribute('data-key');
+            data[key] = el.innerHTML; // keep formatting if any
+          });
+        }
+        const key = storageKeyFor(currentSlideIndex);
+        localStorage.setItem(key, JSON.stringify(data));
+        // try server save (best-effort)
+        try {
+          await fetch(`${API_BASE}/api/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slideId: getSlideId(currentSlideIndex), data })
+          });
+        } catch (_) { /* offline fallback remains in localStorage */ }
+        // small visual feedback
+        saveBtn.style.transform = 'scale(0.96)';
+        setTimeout(() => (saveBtn.style.transform = ''), 120);
+      }
+
+      async function loadSlideFor(index) {
+        try {
+          const raw = localStorage.getItem(storageKeyFor(index));
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          const slide = slides[index];
+          const iframe = slide.querySelector('iframe');
+          if (iframe && iframe.contentDocument) {
+            const doc = iframe.contentDocument;
+            Object.entries(data).forEach(([key, value]) => {
+              const el = doc.querySelector(`[data-key="${key}"]`);
+              if (el) el.innerHTML = value;
+            });
+          } else {
+            Object.entries(data).forEach(([key, value]) => {
+              const el = slide.querySelector(`[data-key="${key}"]`);
+              if (el) el.innerHTML = value;
+            });
+          }
+        } catch (e) {
+          console.warn('Load slide data failed', e);
+        }
+        // Try server load if no local data
+        try {
+          const resp = await fetch(`${API_BASE}/api/load/${getSlideId(index)}`);
+          if (resp.ok) {
+            const json = await resp.json();
+            if (json && json.data) {
+              localStorage.setItem(storageKeyFor(index), JSON.stringify(json.data));
+              // apply
+              const slide = slides[index];
+              const iframe = slide.querySelector('iframe');
+              const data = json.data;
+              if (iframe && iframe.contentDocument) {
+                const doc = iframe.contentDocument;
+                Object.entries(data).forEach(([key, value]) => {
+                  const el = doc.querySelector(`[data-key="${key}"]`);
+                  if (el) el.innerHTML = value;
+                });
+              } else {
+                Object.entries(data).forEach(([key, value]) => {
+                  const el = slide.querySelector(`[data-key="${key}"]`);
+                  if (el) el.innerHTML = value;
+                });
+              }
+            }
+          }
+        } catch(_) { /* ignore if server not running */ }
+      }
+
+      function resetSlide() {
+        localStorage.removeItem(storageKeyFor(currentSlideIndex));
+        window.location.reload();
+      }
+
+      function toggleFullscreen() {
+        const root = document.documentElement;
+        if (!document.fullscreenElement) {
+          if (root.requestFullscreen) root.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      }
+
+      function updateCounter() {
+        slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+      }
+      function ensureIframeLoaded(index) {
+        const slide = slides[index];
+        if (!slide) return;
+        const iframe = slide.querySelector('iframe[data-src]');
+        if (iframe && !iframe.getAttribute('src')) {
+          iframe.setAttribute('src', iframe.getAttribute('data-src'));
+        }
+      }
+      function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach((s, i) => (s.hidden = i !== index));
+        // lazy-load the iframe for this slide (and optionally the next for snappier nav)
+        ensureIframeLoaded(index);
+        ensureIframeLoaded(index + 1);
+        currentSlideIndex = index;
+        updateCounter();
+        // reflect in hash for deep link
+        const id = getSlideId(index);
+        if (location.hash !== `#${id}`) {
+          history.replaceState(null, '', `#${id}`);
+        }
+        applyScale();
+      }
+
+      // Events
+      window.addEventListener('resize', applyScale);
+      toggleEditBtn.addEventListener('click', () => setEditMode(!editMode));
+      saveBtn.addEventListener('click', saveSlide);
+      resetBtn.addEventListener('click', resetSlide);
+      fullscreenBtn.addEventListener('click', toggleFullscreen);
+      nextBtn.addEventListener('click', () => showSlide(Math.min(currentSlideIndex + 1, slides.length - 1)));
+      prevBtn.addEventListener('click', () => showSlide(Math.max(currentSlideIndex - 1, 0)));
+      // Prepare iframes when they load
+      document.querySelectorAll('iframe.slide-iframe').forEach(iframe => {
+        iframe.addEventListener('load', () => {
+          try {
+            const doc = iframe.contentDocument;
+            if (!doc) return;
+            // inject minimal style for editable outline
+            if (!doc.getElementById('injected-edit-style')) {
+              const style = doc.createElement('style');
+              style.id = 'injected-edit-style';
+              style.textContent = `html, body { height: auto; overflow: auto !important; } body { -webkit-overflow-scrolling: touch; } .slide { overflow: auto; } .edit-mode [data-editable]{ outline:2px dashed rgba(255,255,255,0.5); outline-offset:3px; } [data-editable]{ outline:none; }`;
+              doc.head.appendChild(style);
+            }
+            // auto-tag common editable elements with data-key if missing
+            const slideEl = iframe.closest('section.slide');
+            const slideIndex = slides.indexOf(slideEl);
+            const elements = doc.querySelectorAll('h1,h2,h3,.title,.subtitle,.section-title,.example-title,.card-title,.stats-title,.quote-text,.note,.tip-text,.qa-text,.resource-title,.benefit-text,.advantage-text,.definition-text,.origin-text,.step-text,.step-description,.message-bubble,.example-description,.idea-content,.example-business-name,.stat-description,.feature-text,.website-title,.website-subtitle,.question-text,.intro-text,.card-description');
+            elements.forEach((el, idx) => {
+              el.setAttribute('data-editable','');
+              if (!el.getAttribute('data-key')) {
+                el.setAttribute('data-key', `s${getSlideId(slideIndex)}-k${idx}`);
+              }
+            });
+            // load stored data for this slide (after keys exist)
+            loadSlideFor(slideIndex);
+            // reflect current edit mode
+            setEditMode(editMode);
+          } catch { /* ignore cross-origin or other errors */ }
+        });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+          showSlide(Math.min(currentSlideIndex + 1, slides.length - 1));
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          showSlide(Math.max(currentSlideIndex - 1, 0));
+        } else if (e.key.toLowerCase() === 'e') {
+          setEditMode(!editMode);
+        } else if (e.key.toLowerCase() === 'f') {
+          toggleFullscreen();
+        }
+      });
+
+      // Reveal toolbar when the mouse is near the top or moving
+      hoverZone.addEventListener('mouseenter', () => showToolbar());
+      document.addEventListener('mousemove', (e) => {
+        if (e.clientY < 20) {
+          showToolbar();
+        }
+      });
+      // Keep toolbar visible while hovering on it
+      toolbar.addEventListener('mouseenter', () => showToolbar(false));
+      toolbar.addEventListener('mouseleave', () => hideToolbar());
+
+      // Initialize
+      // initial slide by hash
+      const initialHash = location.hash.replace('#', '');
+      const initialIndex = Math.max(0, slides.findIndex(s => (s.getAttribute('data-slide')||'') === initialHash));
+      // initial lazy-load + restore when ready
+      ensureIframeLoaded(initialIndex === -1 ? 0 : initialIndex);
+      slides.forEach((slide, i) => {
+        const iframe = slide.querySelector('iframe');
+        if (!iframe) {
+          loadSlideFor(i);
+        }
+      });
+      showSlide(initialIndex === -1 ? 0 : initialIndex);
+      setEditMode(false);
+      // Show toolbar briefly on load so שהמשתמש ידע שהוא קיים
+      showToolbar();
+    })();
+  </script>
+</body>
+</html>
+
+
