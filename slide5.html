@@ -15,14 +15,15 @@
         }
         body {
             font-family: 'Rubik', sans-serif;
-            overflow: hidden;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
             direction: rtl;
         }
         .slide {
             width: 1280px;
             min-height: 720px;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: white;
         }
@@ -398,14 +399,14 @@
                     </div>
                     
                     <div class="tool-footer">
-                        <div class="tool-link">
-                            claude.ai
-                            <i class="fas fa-external-link-alt"></i>
-                        </div>
+                        <a class="tool-link" href="https://claude.ai" target="_blank" rel="noopener">
+                            claude.ai <i class="fas fa-external-link-alt"></i>
+                        </a>
                         <div class="free-badge">
                             <i class="fas fa-heart"></i>
                             חינם
                         </div>
+                        <div class="qr-box" data-qr-url="https://claude.ai" title="סרקו כדי לפתוח"></div>
                     </div>
                 </div>
                 
@@ -436,14 +437,14 @@
                     </div>
                     
                     <div class="tool-footer">
-                        <div class="tool-link">
-                            lovable.dev
-                            <i class="fas fa-external-link-alt"></i>
-                        </div>
+                        <a class="tool-link" href="https://lovable.dev" target="_blank" rel="noopener">
+                            lovable.dev <i class="fas fa-external-link-alt"></i>
+                        </a>
                         <div class="free-badge">
                             <i class="fas fa-heart"></i>
                             חינם
                         </div>
+                        <div class="qr-box" data-qr-url="https://lovable.dev" title="סרקו כדי לפתוח"></div>
                     </div>
                 </div>
                 
@@ -474,14 +475,14 @@
                     </div>
                     
                     <div class="tool-footer">
-                        <div class="tool-link">
-                            bolt.new
-                            <i class="fas fa-external-link-alt"></i>
-                        </div>
+                        <a class="tool-link" href="https://bolt.new" target="_blank" rel="noopener">
+                            bolt.new <i class="fas fa-external-link-alt"></i>
+                        </a>
                         <div class="free-badge">
                             <i class="fas fa-heart"></i>
                             חינם
                         </div>
+                        <div class="qr-box" data-qr-url="https://bolt.new" title="סרקו כדי לפתוח"></div>
                     </div>
                 </div>
                 
@@ -512,12 +513,12 @@
                     </div>
                     
                     <div class="tool-footer">
-                        <div class="tool-link">base44.com<br><i class="fas fa-external-link-alt"></i>
-                        </div>
+                        <a class="tool-link" href="https://base44.com" target="_blank" rel="noopener">base44.com <i class="fas fa-external-link-alt"></i></a>
                         <div class="free-badge">
                             <i class="fas fa-heart"></i>
                             חינם
                         </div>
+                        <div class="qr-box" data-qr-url="https://base44.com" title="סרקו כדי לפתוח"></div>
                     </div>
                 </div>
             </div>
@@ -527,5 +528,25 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .qr-box { width: 64px; height: 64px; margin-inline-start: 10px; }
+        .tool-footer { gap: 10px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        (function(){
+            const boxes = document.querySelectorAll('.qr-box');
+            boxes.forEach(box => {
+                const url = box.getAttribute('data-qr-url');
+                if (!url) return;
+                const canvas = document.createElement('canvas');
+                box.appendChild(canvas);
+                try { QRCode.toCanvas(canvas, url, { width: 64, margin: 1 }); } catch(e) { /* ignore */ }
+            });
+            // ensure anchor styling preserved
+            document.querySelectorAll('.tool-link').forEach(a => { a.style.textDecoration = 'none'; });
+        })();
+    </script>
 
 </body></html>

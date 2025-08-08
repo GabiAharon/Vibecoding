@@ -16,14 +16,15 @@
         }
         body {
             font-family: 'Rubik', sans-serif;
-            overflow: hidden;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
             direction: rtl;
         }
         .slide {
             width: 1280px;
             min-height: 720px;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: white;
         }
@@ -393,7 +394,7 @@
             </div>
             
             <div class="stats-section">
-                <div class="stats-header">
+            <div class="stats-header">
                     <i class="fas fa-chart-line stats-title"></i>
                     <div class="stats-title">הנתונים מדברים בעד עצמם</div>
                 </div>
@@ -405,21 +406,25 @@
                     
                     <div class="stats-highlights">
                         <div class="stat-item">
-                            <div class="stat-number">83%</div>
-                            <div class="stat-description">מפתחים משתמשים ב-AI</div>
+                            <div class="stat-number">92%</div>
+                            <div class="stat-description">מפתחים מדווחים על שימוש בכלי AI לקוד</div>
                         </div>
                         
                         <div class="stat-item">
-                            <div class="stat-number">152%</div>
-                            <div class="stat-description">עלייה בעסקים עם אתרי AI</div>
+                            <div class="stat-number">72%</div>
+                            <div class="stat-description">ארגונים שאימצו AI לפחות תחום אחד</div>
                         </div>
                         
                         <div class="stat-item">
-                            <div class="stat-number">41%</div>
-                            <div class="stat-description">מכל הקוד בעולם נכתב באמצעות AI ב-2024&nbsp;</div>
+                            <div class="stat-number">61%</div>
+                            <div class="stat-description">מהקוד מופק ע"י AI בחלק מהשפות</div>
                         </div>
                     </div>
                 </div>
+                <div style="font-size:12px; opacity:.85; margin-top:10px; text-align:center">
+                    מקורות: GitHub – "The State of AI in Software Development" (2024); McKinsey – "The State of AI 2024"; GitHub Copilot – נתוני שימוש (2023–2024).
+                    </div>
+            </div>
             </div>
         </div>
     </div>
