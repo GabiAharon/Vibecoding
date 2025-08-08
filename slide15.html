@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלות ומשאבים נוספים</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Rubik', sans-serif;
+            overflow: hidden;
+            direction: rtl;
+        }
+        .slide {
+            width: 1280px;
+            min-height: 720px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+        }
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 1;
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 70px;
+        }
+        .header {
+            margin-bottom: 30px;
+        }
+        .title {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #64b5f6, #42a5f5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+        }
+        .main-container {
+            display: flex;
+            gap: 30px;
+            flex-grow: 1;
+        }
+        .qa-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .qa-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: #ffcc80;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffcc80;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-left: 12px;
+        }
+        .qa-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .qa-icon {
+            font-size: 60px;
+            color: #ffcc80;
+            margin-bottom: 20px;
+        }
+        .qa-text {
+            font-size: 22px;
+            line-height: 1.5;
+            max-width: 80%;
+        }
+        .resources-section {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            flex-grow: 1;
+        }
+        .resource-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .resource-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .resource-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+        .resource-card:nth-child(1)::before {
+            background: #ff9e80;
+        }
+        .resource-card:nth-child(2)::before {
+            background: #80d8ff;
+        }
+        .resource-card:nth-child(3)::before {
+            background: #b388ff;
+        }
+        .resource-card:nth-child(4)::before {
+            background: #a5d6a7;
+        }
+        .resource-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .resource-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 12px;
+            flex-shrink: 0;
+        }
+        .resource-icon i {
+            font-size: 20px;
+        }
+        .resource-card:nth-child(1) .resource-icon i {
+            color: #ff9e80;
+        }
+        .resource-card:nth-child(2) .resource-icon i {
+            color: #80d8ff;
+        }
+        .resource-card:nth-child(3) .resource-icon i {
+            color: #b388ff;
+        }
+        .resource-card:nth-child(4) .resource-icon i {
+            color: #a5d6a7;
+        }
+        .resource-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .resource-card:nth-child(1) .resource-title {
+            color: #ff9e80;
+        }
+        .resource-card:nth-child(2) .resource-title {
+            color: #80d8ff;
+        }
+        .resource-card:nth-child(3) .resource-title {
+            color: #b388ff;
+        }
+        .resource-card:nth-child(4) .resource-title {
+            color: #a5d6a7;
+        }
+        .resource-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+        .resource-item {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+        .resource-item:hover {
+            transform: translateX(-5px);
+        }
+        .resource-item i {
+            margin-left: 8px;
+            font-size: 14px;
+        }
+        .resource-card:nth-child(1) .resource-item i {
+            color: #ff9e80;
+        }
+        .resource-card:nth-child(2) .resource-item i {
+            color: #80d8ff;
+        }
+        .resource-card:nth-child(3) .resource-item i {
+            color: #b388ff;
+        }
+        .resource-card:nth-child(4) .resource-item i {
+            color: #a5d6a7;
+        }
+        .contact-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+        }
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .contact-icon i {
+            font-size: 24px;
+            color: #ffcc80;
+        }
+        .contact-text {
+            font-size: 18px;
+            line-height: 1.4;
+        }
+        .cta-button {
+            background: rgba(144, 202, 249, 0.3);
+            border: 2px solid #90caf9;
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .cta-button:hover {
+            background: rgba(144, 202, 249, 0.5);
+            transform: translateY(-3px);
+        }
+        .cta-button i {
+            margin-left: 10px;
+            font-size: 20px;
+        }
+        .highlight {
+            color: #ffcc80;
+            font-weight: 700;
+        }
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 15s infinite ease-in-out;
+        }
+        .shape:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 70%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+        }
+        .tech-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            animation: move-particle 20s infinite linear;
+        }
+        @keyframes move-particle {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="bg-overlay"></div>
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="tech-particles">
+            <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+            <div class="particle" style="top: 40%; left: 30%; animation-delay: 2s;"></div>
+            <div class="particle" style="top: 60%; left: 50%; animation-delay: 4s;"></div>
+            <div class="particle" style="top: 80%; left: 70%; animation-delay: 6s;"></div>
+            <div class="particle" style="top: 30%; left: 90%; animation-delay: 8s;"></div>
+            <div class="particle" style="top: 70%; left: 20%; animation-delay: 10s;"></div>
+        </div>
+        <div class="content">
+            <div class="header">
+                <h1 class="title">שאלות ומשאבים נוספים</h1>
+            </div>
+            
+            <div class="main-container">
+                <div class="qa-section">
+                    <div class="section-title">
+                        <i class="fas fa-question-circle"></i>
+                        שאלות ותשובות
+                    </div>
+                    
+                    <div class="qa-content">
+                        <i class="fas fa-comments qa-icon"></i>
+                        <div class="qa-text">
+                            יש לכם שאלות? אנחנו כאן כדי לעזור!
+                            <br><br>
+                            שאלו על הכלים, על טכניקות לכתיבת פרומפטים, או כל דבר אחר שקשור לויב קודינג.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="resources-section">
+                    <div class="section-title">
+                        <i class="fas fa-book"></i>
+                        משאבים להמשך למידה
+                    </div>
+                    
+                    <div class="resources-grid">
+                        <div class="resource-card">
+                            <div class="resource-header">
+                                <div class="resource-icon">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div class="resource-title">כלים</div>
+                            </div>
+                            <div class="resource-list">
+                                <div class="resource-item">
+                                    <i class="fas fa-link"></i>
+                                    <div>Claude.ai</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-link"></i>
+                                    <div>Lovable.dev</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-link"></i>
+                                    <div>Bolt.new</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-link"></i>
+                                    <div>Replit.com</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="resource-card">
+                            <div class="resource-header">
+                                <div class="resource-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="resource-title">מדריכים וקורסים</div>
+                            </div>
+                            <div class="resource-list">
+                                <div class="resource-item">
+                                    <i class="fas fa-play-circle"></i>
+                                    <div>מדריך בסיסי לפרומפטים</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-play-circle"></i>
+                                    <div>קורס ויב קודינג למתחילים</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-play-circle"></i>
+                                    <div>עיצוב דפי נחיתה מתקדם</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="resource-card">
+                            <div class="resource-header">
+                                <div class="resource-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="resource-title">קהילות</div>
+                            </div>
+                            <div class="resource-list">
+                                <div class="resource-item">
+                                    <i class="fas fa-comments"></i>
+                                    <div>פורום ויב קודינג ישראל</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-comments"></i>
+                                    <div>קבוצת פייסבוק: AI למפתחים</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-comments"></i>
+                                    <div>דיסקורד: קהילת המפתחים הצעירים</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="resource-card">
+                            <div class="resource-header">
+                                <div class="resource-icon">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="resource-title">השראה</div>
+                            </div>
+                            <div class="resource-list">
+                                <div class="resource-item">
+                                    <i class="fas fa-images"></i>
+                                    <div>גלריית דפי נחיתה מוצלחים</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-images"></i>
+                                    <div>אתרי השראה לעיצוב</div>
+                                </div>
+                                <div class="resource-item">
+                                    <i class="fas fa-images"></i>
+                                    <div>מקרי בוחן של עסקים מקומיים</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-section">
+                <div class="contact-info">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-text">
+                        לשאלות נוספות: <span class="highlight">vibecoding@example.com</span>
+                    </div>
+                </div>
+                
+                <div class="cta-button">
+                    צאו ליישם!
+                    <i class="fas fa-rocket"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

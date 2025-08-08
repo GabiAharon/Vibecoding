@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצגת תוצרים: רגע של השראה!</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Rubik', sans-serif;
+            overflow: hidden;
+            direction: rtl;
+        }
+        .slide {
+            width: 1280px;
+            min-height: 720px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+        }
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 1;
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 70px;
+        }
+        .header {
+            margin-bottom: 30px;
+        }
+        .title {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #64b5f6, #42a5f5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+        }
+        .main-container {
+            display: flex;
+            gap: 30px;
+            flex-grow: 1;
+        }
+        .guidelines-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .guidelines-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: #ffcc80;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffcc80;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-left: 12px;
+        }
+        .guidelines-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        .guideline-item {
+            display: flex;
+            align-items: flex-start;
+            transition: transform 0.3s;
+        }
+        .guideline-item:hover {
+            transform: translateX(-5px);
+        }
+        .guideline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 204, 128, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+        .guideline-icon i {
+            font-size: 20px;
+            color: #ffcc80;
+        }
+        .guideline-text {
+            font-size: 20px;
+            line-height: 1.4;
+        }
+        .tip-box {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .tip-icon {
+            font-size: 30px;
+            color: #ffcc80;
+            margin-left: 15px;
+        }
+        .tip-text {
+            font-size: 18px;
+            line-height: 1.4;
+        }
+        .questions-section {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            flex-grow: 1;
+        }
+        .question-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: flex-start;
+            transition: transform 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .question-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .question-icon {
+            color: #80d8ff;
+            margin-left: 12px;
+            flex-shrink: 0;
+            font-size: 24px;
+        }
+        .question-text {
+            font-size: 18px;
+            line-height: 1.4;
+        }
+        .tools-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .tool-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .tool-item:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .tool-item i {
+            margin-left: 8px;
+            font-size: 18px;
+        }
+        .highlight {
+            color: #ffcc80;
+            font-weight: 700;
+        }
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 15s infinite ease-in-out;
+        }
+        .shape:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 70%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+        }
+        .tech-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            animation: move-particle 20s infinite linear;
+        }
+        @keyframes move-particle {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="bg-overlay"></div>
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="tech-particles">
+            <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+            <div class="particle" style="top: 40%; left: 30%; animation-delay: 2s;"></div>
+            <div class="particle" style="top: 60%; left: 50%; animation-delay: 4s;"></div>
+            <div class="particle" style="top: 80%; left: 70%; animation-delay: 6s;"></div>
+            <div class="particle" style="top: 30%; left: 90%; animation-delay: 8s;"></div>
+            <div class="particle" style="top: 70%; left: 20%; animation-delay: 10s;"></div>
+        </div>
+        <div class="content">
+            <div class="header">
+                <h1 class="title">הצגת תוצרים: רגע של השראה!</h1>
+            </div>
+            
+            <div class="main-container">
+                <div class="guidelines-section">
+                    <div class="section-title">
+                        <i class="fas fa-presentation"></i>
+                        הנחיות להצגה
+                    </div>
+                    
+                    <div class="guidelines-list">
+                        <div class="guideline-item">
+                            <div class="guideline-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="guideline-text">
+                                כל אחד יציג את הדף שיצר בכמה משפטים קצרים
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            <div class="guideline-text">
+                                אפשר להקרין את הדף על המסך או להראות במחשב האישי
+                            </div>
+                        </div>
+                        
+                        <div class="guideline-item">
+                            <div class="guideline-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="guideline-text">
+                                זמן הצגה: עד <span class="highlight">2 דקות</span> לכל משתתף
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-box">
+                        <div class="tip-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="tip-text">
+                            זה לא מבחן! זו הזדמנות לקבל השראה וללמוד מחברים
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="questions-section">
+                    <div class="section-title">
+                        <i class="fas fa-question-circle"></i>
+                        שאלות מנחות להצגה
+                    </div>
+                    
+                    <div class="questions-grid">
+                        <div class="question-card">
+                            <i class="fas fa-code question-icon"></i>
+                            <div class="question-text">
+                                מה בחרתם לבנות?
+                            </div>
+                        </div>
+                        
+                        <div class="question-card">
+                            <i class="fas fa-tools question-icon"></i>
+                            <div class="question-text">
+                                באיזה כלי השתמשתם?
+                            </div>
+                        </div>
+                        
+                        <div class="question-card">
+                            <i class="fas fa-lightbulb question-icon"></i>
+                            <div class="question-text">
+                                מה גיליתם בדרך?
+                            </div>
+                        </div>
+                        
+                        <div class="question-card">
+                            <i class="fas fa-store question-icon"></i>
+                            <div class="question-text">
+                                איזה סוג דף נחיתה? לאיזה עסק?
+                            </div>
+                        </div>
+                        
+                        <div class="question-card">
+                            <i class="fas fa-flag question-icon"></i>
+                            <div class="question-text">
+                                מה המטרה שלו?
+                            </div>
+                        </div>
+                        
+                        <div class="question-card">
+                            <i class="fas fa-chart-line question-icon"></i>
+                            <div class="question-text">
+                                אתגרים? הפתעות?
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tools-container">
+                        <div class="tool-item">
+                            <i class="fas fa-brain"></i>
+                            Claude
+                        </div>
+                        <div class="tool-item">
+                            <i class="fas fa-heart"></i>
+                            Lovable
+                        </div>
+                        <div class="tool-item">
+                            <i class="fas fa-bolt"></i>
+                            Bolt
+                        </div>
+                        <div class="tool-item">
+                            <i class="fas fa-code"></i>
+                            Replit
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
